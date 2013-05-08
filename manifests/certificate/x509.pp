@@ -42,23 +42,22 @@
 #
 #   - `puppetlabs/stdlib`
 #
-define openssl::certificate::x509(
+define openssl::certificate::x509 (
   $country,
   $organization,
   $commonname,
-  $ensure = present,
-  $state = undef,
+  $ensure   = present,
+  $state    = undef,
   $locality = undef,
-  $unit = undef,
+  $unit     = undef,
   $altnames = [],
-  $email = undef,
-  $days = 365,
+  $email    = undef,
+  $days     = 365,
   $base_dir = '/etc/ssl/certs',
-  $owner = 'root',
+  $owner    = 'root',
   $password = undef,
-  $force = true,
-  ) {
-
+  $force    = true,
+  $is_ca    = false) {
   validate_string($name)
   validate_string($country)
   validate_string($organization)
@@ -76,10 +75,11 @@ define openssl::certificate::x509(
   validate_string($owner)
   validate_string($password)
   validate_bool($force)
-  validate_re($ensure, '^(present|absent)$',
-    "\$ensure must be either 'present' or 'absent', got '${ensure}'")
+  validate_bool($is_ca)
+  validate_re($ensure, '^(present|absent)$', "\$ensure must be either 'present' or 'absent', got '${ensure}'"
+  )
 
-  file {"${base_dir}/${name}.cnf":
+  file { "${base_dir}/${name}.cnf":
     ensure  => $ensure,
     owner   => $owner,
     content => template('openssl/cert.cnf.erb'),
