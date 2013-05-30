@@ -46,18 +46,19 @@ define openssl::certificate::x509 (
   $country,
   $organization,
   $commonname,
-  $ensure   = present,
-  $state    = undef,
-  $locality = undef,
-  $unit     = undef,
-  $altnames = [],
-  $email    = undef,
-  $days     = 365,
-  $base_dir = '/etc/ssl/certs',
-  $owner    = 'root',
-  $password = undef,
-  $force    = true,
-  $is_ca    = false) {
+  $ensure        = present,
+  $state         = undef,
+  $locality      = undef,
+  $unit          = undef,
+  $altnames      = [],
+  $email         = undef,
+  $days          = 365,
+  $base_dir      = '/etc/ssl/certs',
+  $owner         = 'root',
+  $password      = undef,
+  $force         = true,
+  $is_ca         = false,
+  $conf_template = false) {
   validate_string($name)
   validate_string($country)
   validate_string($organization)
@@ -79,10 +80,18 @@ define openssl::certificate::x509 (
   validate_re($ensure, '^(present|absent)$', "\$ensure must be either 'present' or 'absent', got '${ensure}'"
   )
 
+  $template = $conf_template ? {
+    false   => 'openssl/cert.cnf.erb',
+    default => $conf_template,
+  }
+
   file { "${base_dir}/${name}.cnf":
     ensure  => $ensure,
     owner   => $owner,
-    content => template('openssl/cert.cnf.erb'),
+    content => template($template),
+    before  => [
+      X509_request["${base_dir}/${name}.csr"],
+      Ssl_pkey["${base_dir}/${name}.key"]],
   }
 
   ssl_pkey { "${base_dir}/${name}.key":

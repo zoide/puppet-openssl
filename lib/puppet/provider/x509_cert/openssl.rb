@@ -1,9 +1,9 @@
 require 'pathname'
+
 Puppet::Type.type(:x509_cert).provide(:openssl) do
   desc 'Manages certificates with OpenSSL'
 
   commands :openssl => 'openssl'
-
   def self.private_key(resource)
     file = File.read(resource[:private_key])
     if resource[:authentication] == :dsa
@@ -12,7 +12,7 @@ Puppet::Type.type(:x509_cert).provide(:openssl) do
       OpenSSL::PKey::RSA.new(file, resource[:password])
     else
       raise Puppet::Error,
-            "Unknown authentication type '#{resource[:authentication]}'"
+      "Unknown authentication type '#{resource[:authentication]}'"
     end
   end
 
@@ -36,22 +36,22 @@ Puppet::Type.type(:x509_cert).provide(:openssl) do
   def create
     if resource[:password]
       openssl(
-        'req',
-        '-config', resource[:template],
-        '-new', '-x509',
-        '-days', resource[:days],
-        '-key', resource[:private_key],
-        '-out', resource[:path],
-        '-passin', "pass:#{resource[:password]}"
+      'req',
+      '-config', resource[:template],
+      '-new', '-x509',
+      '-days', resource[:days],
+      '-key', resource[:private_key],
+      '-out', resource[:path],
+      '-passin', "pass:#{resource[:password]}"
       )
     else
       openssl(
-        'req',
-        '-config', resource[:template],
-        '-new', '-x509',
-        '-days', resource[:days],
-        '-key', resource[:private_key],
-        '-out', resource[:path]
+      'req',
+      '-config', resource[:template],
+      '-new', '-x509',
+      '-days', resource[:days],
+      '-key', resource[:private_key],
+      '-out', resource[:path]
       )
     end
   end
